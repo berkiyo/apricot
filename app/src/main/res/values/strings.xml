@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Apricot</string>
+    <string name="action_toggle">Toggle Dark Theme</string>
+    <string name="action_connection">Connection Status</string>
+    <string name="action_about">About</string>
+</resources>
