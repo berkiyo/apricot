@@ -7,7 +7,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/item2"
-        android:title="@string/action_connection"
+        android:title="@string/action_settings"
         app:showAsAction="never" />
     <item
         android:id="@+id/item3"

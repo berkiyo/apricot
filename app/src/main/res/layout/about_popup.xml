@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="20dp"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Apricot is a meteorology and air quality system designed to be easy to use and stay out of your way.
+        \n\nThis was created as a group project (Team9) for the RMIT Engineering Design 3 project.
+    \n\nThis app is currently work-in-progress and is under heavy development.
+    \n\nVersion v1.0.0"
+        android:textColor="#000000"
+        android:textSize="16dp" />
+
+</LinearLayout>
