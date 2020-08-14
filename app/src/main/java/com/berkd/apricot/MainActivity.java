@@ -30,9 +30,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         aboutPopup();
-        buttonConnection();
-        buttonViewLogs();
-        buttonStartLogging();
+        buttonConnection();         // handle the "connection status" events
+        buttonViewLogs();           // handle the "view logs" events
+        buttonToggleLogging();      // handle the "toggle mode" events
+        buttonProgramMode();        // handle the "program mode" events
     }
 
 
@@ -54,10 +55,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
 
-            // item1 = Clear List
-            // Standalone. Just does one thing.
+            // help popup
             case R.id.item1:
-                Toast.makeText(this, "Hello there.", Toast.LENGTH_SHORT).show();
+                helpPopup();
                 break;
 
             case R.id.item2:
@@ -208,16 +208,72 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void buttonStartLogging() {
+    private void buttonToggleLogging() {
         Button buttonInsert = findViewById(R.id.buttonStartLogging);
         buttonInsert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Toast.makeText(MainActivity.this, "Clicked! Functionality coming soon.", Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.logging_popup, null);
+                mBuilder.setTitle("Logging Options");
+
+                mBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                mBuilder.setView(mView);
+                AlertDialog dialog = mBuilder.create();
+                dialog.show();
 
             }
         });
+    }
+
+    public void buttonProgramMode() {
+        Button buttonInsert = findViewById(R.id.buttonProgramMode);
+        buttonInsert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.mode_popup, null);
+                mBuilder.setTitle("Program Mode");
+
+                mBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                mBuilder.setView(mView);
+                AlertDialog dialog = mBuilder.create();
+                dialog.show();
+
+            }
+        });
+    }
+
+    public void helpPopup() {
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+        View mView = getLayoutInflater().inflate(R.layout.help_popup, null);
+        mBuilder.setTitle("Help");
+
+        mBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        mBuilder.setView(mView);
+        AlertDialog dialog = mBuilder.create();
+        dialog.show();
+
     }
 
 }
