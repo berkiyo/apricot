@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,13 +18,29 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.jjoe64.graphview.*;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.text.DateFormat;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
+
+    /**
+     * DEFINE VARIABLES HERE
+     */
     String[] units = {"Celsius", "Fahrenheit"};
+    private final Handler mHandler = new Handler();
+    private Runnable mTimer;
+    private double graphLastXValue = 5d;
+    private LineGraphSeries<DataPoint> mSeries;
+    private TextView graphType; // used to store the amplitude OR frequency type.
+    private int myDataPoints = 50; // used to set the precision of the amplitude accuracy.
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +51,55 @@ public class MainActivity extends AppCompatActivity {
         buttonViewLogs();           // handle the "view logs" events
         buttonToggleLogging();      // handle the "toggle mode" events
         buttonProgramMode();        // handle the "program mode" events
+
+
+        GraphView graph = (GraphView) findViewById(R.id.graph);
+        initGraph(graph);
+
     }
 
+    public void initGraph(GraphView graph) {
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(10);
+
+        graph.getGridLabelRenderer().setLabelVerticalWidth(100);
+
+        // first mSeries is a line
+        mSeries = new LineGraphSeries<>();
+        mSeries.setDrawDataPoints(true);
+        mSeries.setDrawBackground(true);
+        graph.addSeries(mSeries);
+    }
+
+    @Override
+    public void onResume() {
+
+        runGraph();
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        pauseGraph();
+        super.onPause();
+    }
+
+    public void runGraph() {
+        mTimer = new Runnable() {
+            @Override
+            public void run() {
+                graphLastXValue += 0.25d;
+                mSeries.appendData(new DataPoint(graphLastXValue, 23), true, myDataPoints);
+                mHandler.postDelayed(this, 500);
+            }
+        };
+        mHandler.postDelayed(mTimer, 50);
+    }
+
+    public void pauseGraph() {
+        mHandler.removeCallbacks(mTimer); // pause the graph
+    }
 
     /**
      * ESSENTIAL FOR MENU CREATION!

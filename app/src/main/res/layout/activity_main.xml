@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/graph"
+        android:layout_width="389dp"
+        android:layout_height="323dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.706" />
+
     <ImageView
         android:id="@+id/imageView3"
         android:layout_width="659dp"
@@ -17,17 +27,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/ic_panel" />
-
-    <ImageView
-        android:id="@+id/imageView4"
-        android:layout_width="401dp"
-        android:layout_height="339dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.721"
-        app:srcCompat="@drawable/ic_graph" />
 
     <TextView
         android:id="@+id/textCo2Reading"

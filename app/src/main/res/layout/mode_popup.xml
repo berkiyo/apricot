@@ -9,8 +9,32 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Program mode popup coming soon..."
+        android:text='Pick between "Simulation" and "Real" modes. Simulation is designed to demo the behaviour of the app in different scenarios such as an office, bedroom, smoky day, etc. You can also manually adjust the value of PPMs in a room.\n\n Real mode will try to pair with the hardware and report back real-time data. This part is currently work-in-progress.'
         android:textColor="#000000"
         android:textSize="16dp" />
+
+    <Button
+        android:id="@+id/buttonSimulation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Toggle Simulation Mode"
+        android:background="@drawable/round_button"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:textColor="#ffffff"/>
+
+    <Button
+        android:id="@+id/buttonReal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Toggle Real Mode"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:background="@drawable/round_button"
+        android:textColor="#ffffff"/>
 
 </LinearLayout>
