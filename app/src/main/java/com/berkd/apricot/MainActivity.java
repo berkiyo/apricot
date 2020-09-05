@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 graphLastXValue += 0.25d;
-                mSeries.appendData(new DataPoint(graphLastXValue, 23), true, myDataPoints);
+                mSeries.appendData(new DataPoint(graphLastXValue, Math.random()), true, myDataPoints);
                 mHandler.postDelayed(this, 500);
             }
         };
