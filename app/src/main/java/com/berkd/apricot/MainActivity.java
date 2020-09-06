@@ -44,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView graphType; // used to store the amplitude OR frequency type.
     private int myDataPoints = 50; // used to set the precision of the amplitude accuracy.
 
-    double count = Math.random()*1000;
+    double co2Count = Math.random()*1000;
+    double humidCount = 20;
 
     // set text values
     private TextView co2Reading;
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         buttonProgramMode();        // handle the "program mode" events
 
         updateCo2Val();
-        //updateHumidty();
+        updateHumidity();
         //updateTemperature();
         //updateVentilation();
 
@@ -137,13 +138,40 @@ public class MainActivity extends AppCompatActivity {
                         Thread.sleep(1000);
 
                         runOnUiThread(new Runnable() {
-                            String theVals;
+                            String theCo2Vals;
                             @Override
                             public void run() {
-                                theVals = String.format("%.2f", count);
+                                theCo2Vals = String.format("%.2f", co2Count);
 
-                                co2Reading.setText(String.valueOf(theVals));
-                                count = Math.random()*1000;
+                                co2Reading.setText(String.valueOf(theCo2Vals) + " ppm");
+                                co2Count = Math.random()*1000;
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        thread.start();
+    }
+
+    public void updateHumidity() {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                while (!isInterrupted()){
+                    try {
+                        Thread.sleep(5000);
+
+                        runOnUiThread(new Runnable() {
+                            String theHumidVals;
+                            @Override
+                            public void run() {
+                                theHumidVals = String.format("%.2f", humidCount);
+                                humidCount = humidCount + 0.5;
+                                humidReading.setText(String.valueOf(theHumidVals) + " %");
                             }
                         });
                     } catch (InterruptedException e) {
