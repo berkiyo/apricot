@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,6 +29,8 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import java.text.DateFormat;
 import java.util.Calendar;
 
+import javax.security.auth.callback.Callback;
+
 public class MainActivity extends AppCompatActivity {
 
     /**
@@ -41,16 +44,35 @@ public class MainActivity extends AppCompatActivity {
     private TextView graphType; // used to store the amplitude OR frequency type.
     private int myDataPoints = 50; // used to set the precision of the amplitude accuracy.
 
+    double count = Math.random()*1000;
+
+    // set text values
+    private TextView co2Reading;
+    private TextView tempReading;
+    private TextView humidReading;
+    private TextView ventilationStatus;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        co2Reading = findViewById(R.id.textCo2Val);
+        tempReading = findViewById(R.id.textTempVal);
+        humidReading = findViewById(R.id.textHumidtyVal);
+        ventilationStatus = findViewById(R.id.textVentilationStatus);
+
         aboutPopup();
         buttonConnection();         // handle the "connection status" events
         buttonViewLogs();           // handle the "view logs" events
         buttonToggleLogging();      // handle the "toggle mode" events
         buttonProgramMode();        // handle the "program mode" events
+
+        updateCo2Val();
+        //updateHumidty();
+        //updateTemperature();
+        //updateVentilation();
 
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
@@ -89,16 +111,49 @@ public class MainActivity extends AppCompatActivity {
         mTimer = new Runnable() {
             @Override
             public void run() {
+                double simVal = Math.random()*1000;
+                final String theVal = String.valueOf(simVal); //  make it usable for textView
                 graphLastXValue += 0.25d;
-                mSeries.appendData(new DataPoint(graphLastXValue, Math.random()), true, myDataPoints);
+                mSeries.appendData(new DataPoint(graphLastXValue, simVal), true, myDataPoints);
                 mHandler.postDelayed(this, 500);
+
             }
         };
+
         mHandler.postDelayed(mTimer, 50);
     }
 
     public void pauseGraph() {
         mHandler.removeCallbacks(mTimer); // pause the graph
+    }
+
+
+    public void updateCo2Val() {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                while (!isInterrupted()){
+                    try {
+                        Thread.sleep(1000);
+
+                        runOnUiThread(new Runnable() {
+                            String theVals;
+                            @Override
+                            public void run() {
+                                theVals = String.format("%.2f", count);
+
+                                co2Reading.setText(String.valueOf(theVals));
+                                count = Math.random()*1000;
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        thread.start();
     }
 
     /**
