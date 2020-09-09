@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
      * DEFINE VARIABLES HERE
      */
     String[] units = {"Celsius", "Fahrenheit"};
+    int set = 0;
     private final Handler mHandler = new Handler();
     private Runnable mTimer;
     private double graphLastXValue = 5d;
@@ -46,6 +48,12 @@ public class MainActivity extends AppCompatActivity {
 
     double co2Count = Math.random()*1000;
     double humidCount = 20;
+    int simState = 0;
+    int unitState = 0; // 0 = celsius, 1 = fahrenheit
+
+
+    DatabaseHelper myDB;
+
 
     // set text values
     private TextView co2Reading;
@@ -108,15 +116,32 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
+
     public void runGraph() {
         mTimer = new Runnable() {
             @Override
             public void run() {
-                double simVal = Math.random()*1000;
+                double simVal = 0;
+                switch(simState){
+                    case 0:
+                        // do basic randomness
+                        simVal = Math.random()*1000;
+                        break;
+                    case 1:
+                        // simulate a bedroom with door closed then opened after x amount of time
+                        simVal = 5;
+                        break;
+                    case 2:
+                        // simulate dangerous CO2 levels (i.e. smoky)
+                        simVal = Math.random()*2100;
+                        break;
+
+                }
                 final String theVal = String.valueOf(simVal); //  make it usable for textView
                 graphLastXValue += 0.25d;
                 mSeries.appendData(new DataPoint(graphLastXValue, simVal), true, myDataPoints);
-                mHandler.postDelayed(this, 500);
+                mHandler.postDelayed(this, 1000);
+                co2Count = simVal;
 
             }
         };
@@ -129,6 +154,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * UPDATE CO2 VALUES
+     */
     public void updateCo2Val() {
         Thread thread = new Thread() {
             @Override
@@ -144,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
                                 theCo2Vals = String.format("%.2f", co2Count);
 
                                 co2Reading.setText(String.valueOf(theCo2Vals) + " ppm");
-                                co2Count = Math.random()*1000;
                             }
                         });
                     } catch (InterruptedException e) {
@@ -258,9 +285,6 @@ public class MainActivity extends AppCompatActivity {
      * SETTINGS POPUP
      */
     public void settingsPopup() {
-        final int unit = 0; // 0 == Celsius
-                            // 1 == Fahrenheit
-
 
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
         View mView = getLayoutInflater().inflate(R.layout.settings_popup, null);
@@ -285,11 +309,13 @@ public class MainActivity extends AppCompatActivity {
 
                 if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("celsius")) {
                     Toast.makeText(MainActivity.this, "Celsius set", Toast.LENGTH_SHORT).show();
+                    unitState = 0;
                     saveSpinnerState(0);
                     dialog.dismiss();
                 }
                 if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("fahrenheit")) {
                     Toast.makeText(MainActivity.this, "Fahrenheit Set", Toast.LENGTH_SHORT).show();
+                    unitState = 1;
                     saveSpinnerState(1);
                     dialog.dismiss();
                 }
@@ -348,9 +374,8 @@ public class MainActivity extends AppCompatActivity {
         buttonInsert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Toast.makeText(MainActivity.this, "Clicked! Functionality coming soon.", Toast.LENGTH_SHORT).show();
-
+                Intent intent = new Intent(MainActivity.this, DatabaseActivity.class);
+                startActivity(intent);
             }
         });
     }
@@ -363,9 +388,64 @@ public class MainActivity extends AppCompatActivity {
 
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
                 View mView = getLayoutInflater().inflate(R.layout.logging_popup, null);
-                mBuilder.setTitle("Logging Options");
+                final Spinner mSpinner = mView.findViewById(R.id.spinnerColour);
+                mBuilder.setTitle("Graph Settings");
 
-                mBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                final ArrayAdapter<String> sAdapter = new ArrayAdapter<String>(MainActivity.this,
+                        android.R.layout.simple_spinner_item,
+                        getResources().getStringArray(R.array.colours));
+
+                sAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                mSpinner.setAdapter(sAdapter);
+
+                // Load the previously saved font selection!
+                mSpinner.setSelection(loadSpinnerState());
+                //
+
+                mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("blue")) {
+                            Toast.makeText(MainActivity.this, "Blue set", Toast.LENGTH_SHORT).show();
+                            mSeries.setColor(Color.BLUE);
+                            saveSpinnerState(0);
+                            dialog.dismiss();
+                        }
+                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("red")) {
+                            Toast.makeText(MainActivity.this, "Red Set", Toast.LENGTH_SHORT).show();
+                            mSeries.setColor(Color.RED);
+                            saveSpinnerState(1);
+                            dialog.dismiss();
+                        }
+                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("green")) {
+                            Toast.makeText(MainActivity.this, "Green Set", Toast.LENGTH_SHORT).show();
+                            mSeries.setColor(Color.GREEN);
+                            saveSpinnerState(2);
+                            dialog.dismiss();
+                        }
+                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("yellow")) {
+                            Toast.makeText(MainActivity.this, "Yellow Set", Toast.LENGTH_SHORT).show();
+                            mSeries.setColor(Color.YELLOW);
+                            saveSpinnerState(3);
+                            dialog.dismiss();
+                        }
+                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("black")) {
+                            Toast.makeText(MainActivity.this, "Black Set", Toast.LENGTH_SHORT).show();
+                            mSeries.setColor(Color.BLACK);
+                            saveSpinnerState(4);
+                            dialog.dismiss();
+                        }
+                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("magenta")) {
+                            Toast.makeText(MainActivity.this, "Black Set", Toast.LENGTH_SHORT).show();
+                            mSeries.setColor(Color.MAGENTA);
+                            saveSpinnerState(5);
+                            dialog.dismiss();
+                        }
+                    }
+                });
+
+                mBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -381,16 +461,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void buttonProgramMode() {
-        Button buttonInsert = findViewById(R.id.buttonProgramMode);
-        buttonInsert.setOnClickListener(new View.OnClickListener() {
+        Button btnProgramMode = findViewById(R.id.buttonProgramMode);
+        btnProgramMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
                 View mView = getLayoutInflater().inflate(R.layout.mode_popup, null);
+                final Spinner mSpinner = mView.findViewById(R.id.spinnerSimModes);
                 mBuilder.setTitle("Program Mode");
 
-                mBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                final ArrayAdapter<String> sAdapter = new ArrayAdapter<String>(MainActivity.this,
+                        android.R.layout.simple_spinner_item,
+                        getResources().getStringArray(R.array.modes));
+
+                sAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                mSpinner.setAdapter(sAdapter);
+
+                mSpinner.setSelection(loadSpinnerState());
+
+                mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("random")) {
+                            Toast.makeText(MainActivity.this, "Random simulation set", Toast.LENGTH_SHORT).show();
+                            simState = 0;
+                            saveSpinnerState(0);
+                            dialog.dismiss();
+                        }
+                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("bedroom")) {
+                            Toast.makeText(MainActivity.this, "Bedroom simulation set", Toast.LENGTH_SHORT).show();
+                            simState = 1;
+                            saveSpinnerState(1);
+                            dialog.dismiss();
+                        }
+                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("Smoky")) {
+                            Toast.makeText(MainActivity.this, "Smoky simulation set", Toast.LENGTH_SHORT).show();
+                            simState = 2;
+                            saveSpinnerState(2);
+                            dialog.dismiss();
+                        }
+                    }
+                });
+                mBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -423,4 +536,67 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * DATABASE STUFF HERE
+     */
+
+    public void addData(String newEntry) {
+
+        boolean insertData = myDB.addData(newEntry);
+
+        if(insertData == true){
+            Toast.makeText(this, "Data Successfully Inserted!", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Something went wrong :(.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+/*
+    public void newEntry() {
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
+        final View mView = getLayoutInflater().inflate(R.layout.save_popup, null); // must be declared final!!!
+
+
+        pauseGraph();
+
+        final EditText mEditText = findViewById(R.id.saveTextField);
+        mBuilder.setView(mView);
+        mBuilder.setTitle("Save Graph");
+
+
+        mBuilder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Calendar calendar = Calendar.getInstance(); // Get current time and make it the subtext
+                String currentDate = DateFormat.getDateInstance(DateFormat.FULL).format(calendar.getTime()); // format date
+
+                EditText editText = mView.findViewById(R.id.saveTextField); // this is the way. Don't forget the mView part!
+
+                // ADD THE TEXT!!!
+                addData("\nTitle: " + editText.getText().toString() +"\n\nLast Frequency = " + textFrequency.getText().toString() +
+                        "\nLast Amplitude = " + textAmplitude.getText().toString() +
+                        "\n\n" + currentDate + "\n");
+
+
+                runGraph();
+                dialog.dismiss();
+
+            }
+        });
+
+        mBuilder.setPositiveButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                runGraph();
+                dialog.dismiss();
+            }
+
+        });
+
+        AlertDialog dialog = mBuilder.create();
+        dialog.show();
+
+    }
+*/
 }

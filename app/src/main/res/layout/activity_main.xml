@@ -124,7 +124,7 @@
         android:layout_width="85dp"
         android:layout_height="55dp"
         android:background="@drawable/round_button"
-        android:text="Toggle\nLogging"
+        android:text="Graph\nSettings"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -174,7 +174,7 @@
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.343"
+        app:layout_constraintHorizontal_bias="0.352"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.963" />
@@ -213,9 +213,9 @@
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.683"
+        app:layout_constraintHorizontal_bias="0.608"
         app:layout_constraintStart_toEndOf="@+id/textCo2Val"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.049" />
+        app:layout_constraintVertical_bias="0.063" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,8 +9,29 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Logging options coming soon!"
+        android:text="Change the colour of the graph, stop/start graph and more."
         android:textColor="#000000"
         android:textSize="16dp" />
+
+    <Spinner
+        android:id="@+id/spinnerColour"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"/>
+
+    <Button
+        android:id="@+id/buttonGraphToggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start / Stop Graph"
+        android:background="@drawable/round_button"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:textColor="#ffffff"/>
 
 </LinearLayout>

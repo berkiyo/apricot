@@ -11,4 +11,19 @@
 
     <string name="unit_celsius">Celsius</string>
     <string name="unit_fahrenheit">Fahrenheit</string>
+
+    <string-array name="colours">
+        <item>Blue</item>
+        <item>Red</item>
+        <item>Green</item>
+        <item>Yellow</item>
+        <item>Black</item>
+        <item>Magenta</item>
+    </string-array>
+
+    <string-array name="modes">
+        <item>Random</item>
+        <item>Bedroom</item>
+        <item>Smoky</item>
+    </string-array>
 </resources>
