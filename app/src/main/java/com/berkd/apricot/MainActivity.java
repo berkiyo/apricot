@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case 2:
                         // simulate dangerous CO2 levels (i.e. smoky)
-                        simVal = Math.random()*2100;
+                        simVal = Math.random()*2500;
                         break;
 
                 }
@@ -172,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
                                 theCo2Vals = String.format("%.2f", co2Count);
 
                                 co2Reading.setText(String.valueOf(theCo2Vals) + " ppm");
+
                             }
                         });
                     } catch (InterruptedException e) {
