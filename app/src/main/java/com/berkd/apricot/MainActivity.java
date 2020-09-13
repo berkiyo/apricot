@@ -12,6 +12,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -143,6 +145,8 @@ public class MainActivity extends AppCompatActivity {
                 mHandler.postDelayed(this, 1000);
                 co2Count = simVal;
 
+
+
             }
         };
 
@@ -156,6 +160,8 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * UPDATE CO2 VALUES
+     *
+     *
      */
     public void updateCo2Val() {
         Thread thread = new Thread() {
@@ -301,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
         mSpinner.setAdapter(sAdapter);
 
         // Load the previously saved font selection!
-        mSpinner.setSelection(loadSpinnerState());
+        mSpinner.setSelection(loadSpinnerState("settings"));
         //
 
         mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -311,13 +317,13 @@ public class MainActivity extends AppCompatActivity {
                 if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("celsius")) {
                     Toast.makeText(MainActivity.this, "Celsius set", Toast.LENGTH_SHORT).show();
                     unitState = 0;
-                    saveSpinnerState(0);
+                    saveSpinnerState(0, "settings");
                     dialog.dismiss();
                 }
                 if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("fahrenheit")) {
                     Toast.makeText(MainActivity.this, "Fahrenheit Set", Toast.LENGTH_SHORT).show();
                     unitState = 1;
-                    saveSpinnerState(1);
+                    saveSpinnerState(1, "settings");
                     dialog.dismiss();
                 }
             }
@@ -340,8 +346,8 @@ public class MainActivity extends AppCompatActivity {
      * SAVE_SPINNER_STATE
      *  Store the position of the spinner
      */
-    public void saveSpinnerState(int userChoice) {
-        SharedPreferences sharedPref = getSharedPreferences("FileName",0);
+    public void saveSpinnerState(int userChoice, String dataName) {
+        SharedPreferences sharedPref = getSharedPreferences(dataName,0);
         SharedPreferences.Editor prefEditor = sharedPref.edit();
         prefEditor.putInt("userChoiceSpinner", userChoice);
         prefEditor.commit();
@@ -351,8 +357,8 @@ public class MainActivity extends AppCompatActivity {
      * LOAD_SPINNER_STATE
      *  Return the value of the previously selected font size, return integer array value
      */
-    public int loadSpinnerState() {
-        SharedPreferences sharedPref = getSharedPreferences("FileName",MODE_PRIVATE);
+    public int loadSpinnerState(String dataName) {
+        SharedPreferences sharedPref = getSharedPreferences(dataName, MODE_PRIVATE);
         int spinnerValue = sharedPref.getInt("userChoiceSpinner",-1);
         return spinnerValue;
     }
@@ -400,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
                 mSpinner.setAdapter(sAdapter);
 
                 // Load the previously saved font selection!
-                mSpinner.setSelection(loadSpinnerState());
+                mSpinner.setSelection(loadSpinnerState("colour"));
                 //
 
                 mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -410,37 +416,37 @@ public class MainActivity extends AppCompatActivity {
                         if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("blue")) {
                             Toast.makeText(MainActivity.this, "Blue set", Toast.LENGTH_SHORT).show();
                             mSeries.setColor(Color.BLUE);
-                            saveSpinnerState(0);
+                            saveSpinnerState(0, "colour");
                             dialog.dismiss();
                         }
                         if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("red")) {
                             Toast.makeText(MainActivity.this, "Red Set", Toast.LENGTH_SHORT).show();
                             mSeries.setColor(Color.RED);
-                            saveSpinnerState(1);
+                            saveSpinnerState(1,"colour");
                             dialog.dismiss();
                         }
                         if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("green")) {
                             Toast.makeText(MainActivity.this, "Green Set", Toast.LENGTH_SHORT).show();
                             mSeries.setColor(Color.GREEN);
-                            saveSpinnerState(2);
+                            saveSpinnerState(2, "colour");
                             dialog.dismiss();
                         }
                         if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("yellow")) {
                             Toast.makeText(MainActivity.this, "Yellow Set", Toast.LENGTH_SHORT).show();
                             mSeries.setColor(Color.YELLOW);
-                            saveSpinnerState(3);
+                            saveSpinnerState(3, "colour");
                             dialog.dismiss();
                         }
                         if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("black")) {
                             Toast.makeText(MainActivity.this, "Black Set", Toast.LENGTH_SHORT).show();
                             mSeries.setColor(Color.BLACK);
-                            saveSpinnerState(4);
+                            saveSpinnerState(4, "colour");
                             dialog.dismiss();
                         }
                         if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("magenta")) {
                             Toast.makeText(MainActivity.this, "Black Set", Toast.LENGTH_SHORT).show();
                             mSeries.setColor(Color.MAGENTA);
-                            saveSpinnerState(5);
+                            saveSpinnerState(5, "colour");
                             dialog.dismiss();
                         }
                     }
@@ -479,7 +485,7 @@ public class MainActivity extends AppCompatActivity {
                 sAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 mSpinner.setAdapter(sAdapter);
 
-                mSpinner.setSelection(loadSpinnerState());
+                mSpinner.setSelection(loadSpinnerState("mode"));
 
                 mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
@@ -487,19 +493,19 @@ public class MainActivity extends AppCompatActivity {
                         if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("random")) {
                             Toast.makeText(MainActivity.this, "Random simulation set", Toast.LENGTH_SHORT).show();
                             simState = 0;
-                            saveSpinnerState(0);
+                            saveSpinnerState(0, "mode");
                             dialog.dismiss();
                         }
                         if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("bedroom")) {
                             Toast.makeText(MainActivity.this, "Bedroom simulation set", Toast.LENGTH_SHORT).show();
                             simState = 1;
-                            saveSpinnerState(1);
+                            saveSpinnerState(1, "mode");
                             dialog.dismiss();
                         }
                         if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("Smoky")) {
                             Toast.makeText(MainActivity.this, "Smoky simulation set", Toast.LENGTH_SHORT).show();
                             simState = 2;
-                            saveSpinnerState(2);
+                            saveSpinnerState(2, "mode");
                             dialog.dismiss();
                         }
                     }
