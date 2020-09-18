@@ -2,8 +2,15 @@ package com.berkd.apricot;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,16 +37,24 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.security.auth.callback.Callback;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int REQUEST_ENABLE_BT = 0;
+    private static final int REQUEST_DISCOVER_BT = 1;
+
     /**
      * DEFINE VARIABLES HERE
      */
     String[] units = {"Celsius", "Fahrenheit"};
+    int[] roomSim = {480, 460, 490, 510, 520, 560, 600, 590, 760, 900, 1050, 1120, 1075, 1010, 980, 975, 1080, 1250, 1450, 1500, 1650, 1750, 1800, 1950, 2000, 2050, 2100, 2150, 2180, 2200, 2250, 2300, 2400, 2500, 2550, 2600, 2750, 2650, 2800, 2850, 2900, 2950, 3100, 3300, 3400, 3100, 2800, 2250, 2000, 1700, 1500, 1300, 1200, 1150, 1250, 1350, 1240, 1240, 1050, 580, 490, 485, 520, 600, 770, 775, 770};
+    int index = 0;
+
     int set = 0;
     private final Handler mHandler = new Handler();
     private Runnable mTimer;
@@ -53,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     int simState = 0;
     int unitState = 0; // 0 = celsius, 1 = fahrenheit
 
+    BluetoothAdapter mBlueAdapter;
 
     DatabaseHelper myDB;
 
@@ -62,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tempReading;
     private TextView humidReading;
     private TextView ventilationStatus;
+    private TextView connectionStatus;
 
 
     @Override
@@ -73,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         tempReading = findViewById(R.id.textTempVal);
         humidReading = findViewById(R.id.textHumidtyVal);
         ventilationStatus = findViewById(R.id.textVentilationStatus);
+        connectionStatus = findViewById(R.id.textConnectionStatus);
 
         aboutPopup();
         buttonConnection();         // handle the "connection status" events
@@ -85,10 +103,20 @@ public class MainActivity extends AppCompatActivity {
         //updateTemperature();
         //updateVentilation();
 
-
         GraphView graph = (GraphView) findViewById(R.id.graph);
         initGraph(graph);
 
+    }
+
+
+    public void bluetoothSetup() {
+        mBlueAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (mBlueAdapter == null) {
+            connectionStatus.setText("Bluetooth Not Available");
+        } else {
+            connectionStatus.setText("Bluetooth Available");
+        }
     }
 
     public void initGraph(GraphView graph) {
@@ -124,18 +152,51 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 double simVal = 0;
+                Date date = Calendar.getInstance().getTime();
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+                String strDate = dateFormat.format(date);
+
                 switch(simState){
                     case 0:
                         // do basic randomness
                         simVal = Math.random()*1000;
+                        ventilationStatus.setText("Debug Mode Enabled");
+                        ventilationStatus.setTextColor(Color.BLUE);
                         break;
                     case 1:
                         // simulate a bedroom with door closed then opened after x amount of time
-                        simVal = 5;
+                        if (index < roomSim.length) {
+                            simVal = roomSim[index];
+                            index++;
+                            if (simVal > 2800) {
+                                ventilationStatus.setText("Danger! Ventilate Immediately");
+                                ventilationStatus.setTextColor(Color.parseColor("#CF0300"));
+                                notifyEmergency();
+                            }
+                            else if (simVal > 2500) {
+                                ventilationStatus.setText("Ventilate Immediately");
+                                ventilationStatus.setTextColor(Color.parseColor("#CF0300"));
+                            }
+                            else if (simVal > 1000) {
+                                ventilationStatus.setText("Consider Ventilating");
+                                ventilationStatus.setTextColor(Color.parseColor("#E86016"));
+                                //addData("Dangerous CO2 Level at: " + strDate);
+
+                            }
+                            else {
+                                ventilationStatus.setText("Ventilation Not Required");
+                                ventilationStatus.setTextColor(Color.parseColor("#16AA22"));
+
+                            }
+                        } else {
+                            index = 0;
+                        }
                         break;
                     case 2:
                         // simulate dangerous CO2 levels (i.e. smoky)
                         simVal = Math.random()*2500;
+                        ventilationStatus.setText("Smoky Test (Debug)");
+                        ventilationStatus.setTextColor(Color.parseColor("#710095"));
                         break;
 
                 }
@@ -157,6 +218,28 @@ public class MainActivity extends AppCompatActivity {
         mHandler.removeCallbacks(mTimer); // pause the graph
     }
 
+
+    public void notifyEmergency() {
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(
+                MainActivity.this, "Emergency")
+                .setSmallIcon(R.drawable.ic_warning)
+                .setContentTitle("Apricot")
+                .setContentText("CO2 Concentration Over 2800 ppm! Ventilate immediately.")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(MainActivity.class);
+
+// Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(resultPendingIntent);
+
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(3000, builder.build());
+    }
 
     /**
      * UPDATE CO2 VALUES
@@ -242,13 +325,23 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.item2:
+                //savePopup();
+                Toast.makeText(MainActivity.this, "Coming soon.", Toast.LENGTH_SHORT).show();
+                break;
+
+            case R.id.item3:
+                //pauseGraph();
+                Toast.makeText(MainActivity.this, "Coming soon.", Toast.LENGTH_SHORT).show();
+
+
+            case R.id.item4:
                 settingsPopup();
                 break;
-            case R.id.item3:
+            case R.id.item5:
                 Toast.makeText(this, "Dark mode coming soon!", Toast.LENGTH_SHORT).show();
 
                 break;
-            case R.id.item4:
+            case R.id.item6:
                 aboutPopup();
                 break;
         }
@@ -364,15 +457,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void buttonConnection() {
-        Button buttonInsert = findViewById(R.id.buttonConnection);
-        buttonInsert.setOnClickListener(new View.OnClickListener() {
+        Button buttonStatus = findViewById(R.id.buttonConnection);
+        buttonStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.status_popup, null);
+                mBuilder.setTitle("Status");
 
-                Toast.makeText(MainActivity.this, "Clicked! Functionality coming soon.", Toast.LENGTH_SHORT).show();
 
+                mBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                mBuilder.setView(mView);
+                AlertDialog dialog = mBuilder.create();
+                dialog.show();
             }
         });
+
+
     }
 
 
@@ -605,5 +712,5 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
 
     }
-*/
+    */
 }

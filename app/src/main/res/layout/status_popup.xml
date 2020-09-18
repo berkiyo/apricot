@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="20dp"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WORK IN PROGRESS\n\nPreliminary setup for connecting with bluetooth device. No major functionality implemented yet."
+        android:textColor="#000000"
+        android:textSize="16dp" />
+
+    <Button
+        android:id="@+id/buttonBtOnOff"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ON/OFF Bluetooth"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="60dp"
+        android:background="@drawable/round_button_blue"
+        android:textColor="#ffffff"/>
+
+    <Button
+        android:id="@+id/buttonBtDiscoverable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/round_button"
+        android:text="Enable Discoverable"
+        android:textColor="#ffffff" />
+
+    <Button
+        android:id="@+id/buttonBtDiscover"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Discover Devices"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="60dp"
+        android:background="@drawable/round_button"
+        android:textColor="#ffffff"/>
+
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:layout_marginTop="10dp"
+        android:textColor="#000000"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="n/a"
+        android:layout_marginTop="5dp"
+        android:textColor="#000000"
+        android:textSize="18dp" />
+
+</LinearLayout>
