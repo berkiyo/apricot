@@ -3,9 +3,11 @@ package com.berkd.apricot;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.app.AlertDialog;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
@@ -16,6 +18,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -65,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
     double co2Count = Math.random()*1000;
     double humidCount = 20;
+    double simVal = 0;
+
     int simState = 0;
     int unitState = 0; // 0 = celsius, 1 = fahrenheit
 
@@ -98,10 +103,16 @@ public class MainActivity extends AppCompatActivity {
         buttonToggleLogging();      // handle the "toggle mode" events
         buttonProgramMode();        // handle the "program mode" events
 
+        createNotificationChannel(); // create the notification channel
+
+
+
         updateCo2Val();
         updateHumidity();
         //updateTemperature();
         //updateVentilation();
+
+
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
         initGraph(graph);
@@ -137,13 +148,46 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
 
         runGraph();
+        runNotify();
         super.onResume();
     }
 
     @Override
     public void onPause() {
         pauseGraph();
+        pauseNotify();
         super.onPause();
+    }
+
+    public void runNotify() {
+        mTimer = new Runnable() {
+            int notificationOn = 0;
+            int secondsSinceLast = 0;
+            @Override
+            public void run() {
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this, "apricot")
+                        .setSmallIcon(R.drawable.ic_warning)
+                        .setContentTitle("Apricot Notification")
+                        .setContentText("Consider ventilating immediately! CO2 levels over 2000.")
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainActivity.this);
+
+                if (simVal >= 2000) {
+                    if (secondsSinceLast == 0) {
+                        notificationManager.notify(100, builder.build());
+                        secondsSinceLast++;
+                    } else {
+                        secondsSinceLast++;
+                    }
+                }
+                if (secondsSinceLast == 20) {
+                    secondsSinceLast = 0; //  if 20 seconds has elapsed, then reset
+                }
+                mHandler.postDelayed(this, 1000);
+            }
+        };
+
+        mHandler.postDelayed(mTimer, 50);
     }
 
 
@@ -151,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
         mTimer = new Runnable() {
             @Override
             public void run() {
-                double simVal = 0;
+
                 Date date = Calendar.getInstance().getTime();
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
                 String strDate = dateFormat.format(date);
@@ -171,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                             if (simVal > 2800) {
                                 ventilationStatus.setText("Danger! Ventilate Immediately");
                                 ventilationStatus.setTextColor(Color.parseColor("#CF0300"));
-                                notifyEmergency();
+
                             }
                             else if (simVal > 2500) {
                                 ventilationStatus.setText("Ventilate Immediately");
@@ -208,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
             }
         };
 
@@ -218,28 +263,10 @@ public class MainActivity extends AppCompatActivity {
         mHandler.removeCallbacks(mTimer); // pause the graph
     }
 
-
-    public void notifyEmergency() {
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(
-                MainActivity.this, "Emergency")
-                .setSmallIcon(R.drawable.ic_warning)
-                .setContentTitle("Apricot")
-                .setContentText("CO2 Concentration Over 2800 ppm! Ventilate immediately.")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MainActivity.class);
-
-// Adds the Intent that starts the Activity to the top of the stack
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(resultPendingIntent);
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(3000, builder.build());
+    public void pauseNotify() {
+        mHandler.removeCallbacks(mTimer); // pause the graph
     }
+
 
     /**
      * UPDATE CO2 VALUES
@@ -572,6 +599,19 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "apricotChannel";
+            String description = "Alert channel for Apirocot alerts";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("apricot", name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     public void buttonProgramMode() {
