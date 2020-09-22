@@ -6,13 +6,9 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import android.app.AlertDialog;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.bluetooth.BluetoothAdapter;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,16 +17,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,8 +35,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
-import javax.security.auth.callback.Callback;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -76,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     BluetoothAdapter mBlueAdapter;
 
     DatabaseHelper myDB;
+    private boolean buttonFreezeClicked = false;
 
 
     // set text values
@@ -100,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
         aboutPopup();
         buttonConnection();         // handle the "connection status" events
         buttonViewLogs();           // handle the "view logs" events
-        buttonToggleLogging();      // handle the "toggle mode" events
         buttonProgramMode();        // handle the "program mode" events
 
         createNotificationChannel(); // create the notification channel
@@ -155,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         pauseGraph();
-        pauseNotify();
         super.onPause();
     }
 
@@ -263,10 +252,6 @@ public class MainActivity extends AppCompatActivity {
         mHandler.removeCallbacks(mTimer); // pause the graph
     }
 
-    public void pauseNotify() {
-        mHandler.removeCallbacks(mTimer); // pause the graph
-    }
-
 
     /**
      * UPDATE CO2 VALUES
@@ -300,6 +285,23 @@ public class MainActivity extends AppCompatActivity {
 
         thread.start();
     }
+
+
+
+    public void freezeClicked(View view) {
+
+        if (buttonFreezeClicked) {
+            runGraph();
+            // set it back to normal state
+            buttonFreezeClicked = false;
+
+        } else {
+            pauseGraph();
+            buttonFreezeClicked = true;
+        }
+
+    }
+
 
     public void updateHumidity() {
         Thread thread = new Thread() {
@@ -352,23 +354,18 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.item2:
-                //savePopup();
-                Toast.makeText(MainActivity.this, "Coming soon.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "IC_SAVE", Toast.LENGTH_SHORT).show();
                 break;
 
             case R.id.item3:
-                //pauseGraph();
-                Toast.makeText(MainActivity.this, "Coming soon.", Toast.LENGTH_SHORT).show();
-
-
-            case R.id.item4:
                 settingsPopup();
                 break;
-            case R.id.item5:
-                Toast.makeText(this, "Dark mode coming soon!", Toast.LENGTH_SHORT).show();
 
+            case R.id.item4:
+                Toast.makeText(this, "Dark mode coming soon!", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.item6:
+
+            case R.id.item5:
                 aboutPopup();
                 break;
         }
@@ -418,22 +415,36 @@ public class MainActivity extends AppCompatActivity {
         mBuilder.setTitle("Settings");
 
         final Spinner mSpinner = mView.findViewById(R.id.unit_spinner);
+        final Spinner mSpinner2 = mView.findViewById(R.id.spinnerColour);
 
         final ArrayAdapter<String> sAdapter = new ArrayAdapter<String>(MainActivity.this,
                 android.R.layout.simple_spinner_item,
                 getResources().getStringArray(R.array.units));
 
+        final ArrayAdapter<String> sAdapter2 = new ArrayAdapter<String>(MainActivity.this,
+                android.R.layout.simple_spinner_item,
+                getResources().getStringArray(R.array.colours));
+
         sAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinner.setAdapter(sAdapter);
 
+        sAdapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinner2.setAdapter(sAdapter2);
+
+
         // Load the previously saved font selection!
         mSpinner.setSelection(loadSpinnerState("settings"));
+        mSpinner2.setSelection(loadSpinnerState("colour"));
+
         //
 
         mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
+                /**
+                 * UNITS
+                 */
                 if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("celsius")) {
                     Toast.makeText(MainActivity.this, "Celsius set", Toast.LENGTH_SHORT).show();
                     unitState = 0;
@@ -444,6 +455,46 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Fahrenheit Set", Toast.LENGTH_SHORT).show();
                     unitState = 1;
                     saveSpinnerState(1, "settings");
+                    dialog.dismiss();
+                }
+
+                /**
+                 * COLOURS
+                 */
+                if(mSpinner2.getSelectedItem().toString().equalsIgnoreCase("blue")) {
+                    Toast.makeText(MainActivity.this, "Blue set", Toast.LENGTH_SHORT).show();
+                    mSeries.setColor(Color.BLUE);
+                    saveSpinnerState(0, "colour");
+                    dialog.dismiss();
+                }
+                if(mSpinner2.getSelectedItem().toString().equalsIgnoreCase("red")) {
+                    Toast.makeText(MainActivity.this, "Red Set", Toast.LENGTH_SHORT).show();
+                    mSeries.setColor(Color.RED);
+                    saveSpinnerState(1,"colour");
+                    dialog.dismiss();
+                }
+                if(mSpinner2.getSelectedItem().toString().equalsIgnoreCase("green")) {
+                    Toast.makeText(MainActivity.this, "Green Set", Toast.LENGTH_SHORT).show();
+                    mSeries.setColor(Color.GREEN);
+                    saveSpinnerState(2, "colour");
+                    dialog.dismiss();
+                }
+                if(mSpinner2.getSelectedItem().toString().equalsIgnoreCase("yellow")) {
+                    Toast.makeText(MainActivity.this, "Yellow Set", Toast.LENGTH_SHORT).show();
+                    mSeries.setColor(Color.YELLOW);
+                    saveSpinnerState(3, "colour");
+                    dialog.dismiss();
+                }
+                if(mSpinner2.getSelectedItem().toString().equalsIgnoreCase("black")) {
+                    Toast.makeText(MainActivity.this, "Black Set", Toast.LENGTH_SHORT).show();
+                    mSeries.setColor(Color.BLACK);
+                    saveSpinnerState(4, "colour");
+                    dialog.dismiss();
+                }
+                if(mSpinner2.getSelectedItem().toString().equalsIgnoreCase("magenta")) {
+                    Toast.makeText(MainActivity.this, "Black Set", Toast.LENGTH_SHORT).show();
+                    mSeries.setColor(Color.MAGENTA);
+                    saveSpinnerState(5, "colour");
                     dialog.dismiss();
                 }
             }
@@ -517,86 +568,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, DatabaseActivity.class);
                 startActivity(intent);
-            }
-        });
-    }
-
-    private void buttonToggleLogging() {
-        Button buttonInsert = findViewById(R.id.buttonStartLogging);
-        buttonInsert.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
-                View mView = getLayoutInflater().inflate(R.layout.logging_popup, null);
-                final Spinner mSpinner = mView.findViewById(R.id.spinnerColour);
-                mBuilder.setTitle("Graph Settings");
-
-                final ArrayAdapter<String> sAdapter = new ArrayAdapter<String>(MainActivity.this,
-                        android.R.layout.simple_spinner_item,
-                        getResources().getStringArray(R.array.colours));
-
-                sAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                mSpinner.setAdapter(sAdapter);
-
-                // Load the previously saved font selection!
-                mSpinner.setSelection(loadSpinnerState("colour"));
-                //
-
-                mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("blue")) {
-                            Toast.makeText(MainActivity.this, "Blue set", Toast.LENGTH_SHORT).show();
-                            mSeries.setColor(Color.BLUE);
-                            saveSpinnerState(0, "colour");
-                            dialog.dismiss();
-                        }
-                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("red")) {
-                            Toast.makeText(MainActivity.this, "Red Set", Toast.LENGTH_SHORT).show();
-                            mSeries.setColor(Color.RED);
-                            saveSpinnerState(1,"colour");
-                            dialog.dismiss();
-                        }
-                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("green")) {
-                            Toast.makeText(MainActivity.this, "Green Set", Toast.LENGTH_SHORT).show();
-                            mSeries.setColor(Color.GREEN);
-                            saveSpinnerState(2, "colour");
-                            dialog.dismiss();
-                        }
-                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("yellow")) {
-                            Toast.makeText(MainActivity.this, "Yellow Set", Toast.LENGTH_SHORT).show();
-                            mSeries.setColor(Color.YELLOW);
-                            saveSpinnerState(3, "colour");
-                            dialog.dismiss();
-                        }
-                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("black")) {
-                            Toast.makeText(MainActivity.this, "Black Set", Toast.LENGTH_SHORT).show();
-                            mSeries.setColor(Color.BLACK);
-                            saveSpinnerState(4, "colour");
-                            dialog.dismiss();
-                        }
-                        if(mSpinner.getSelectedItem().toString().equalsIgnoreCase("magenta")) {
-                            Toast.makeText(MainActivity.this, "Black Set", Toast.LENGTH_SHORT).show();
-                            mSeries.setColor(Color.MAGENTA);
-                            saveSpinnerState(5, "colour");
-                            dialog.dismiss();
-                        }
-                    }
-                });
-
-                mBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-
-                mBuilder.setView(mView);
-                AlertDialog dialog = mBuilder.create();
-                dialog.show();
-
             }
         });
     }

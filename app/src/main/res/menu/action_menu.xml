@@ -10,20 +10,16 @@
         android:icon="@drawable/ic_save"
         app:showAsAction="always" />
 
-    <item android:id="@+id/item3"
-        android:icon="@drawable/ic_pause"
-        app:showAsAction="always" />
-
     <item
-        android:id="@+id/item4"
+        android:id="@+id/item3"
         android:title="@string/action_settings"
         app:showAsAction="never" />
     <item
-        android:id="@+id/item5"
+        android:id="@+id/item4"
         android:title="@string/action_toggle"
         app:showAsAction="never" />
 
-    <item android:id="@+id/item6"
+    <item android:id="@+id/item5"
         android:title="@string/action_about"
         app:showAsAction="never"/>
 
