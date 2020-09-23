@@ -106,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
         initGraph(graph);
+        runGraph();
+        runNotify();
 
     }
 
@@ -136,15 +138,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onResume() {
-
-        runGraph();
-        runNotify();
         super.onResume();
     }
 
     @Override
     public void onPause() {
-        pauseGraph();
+        //pauseGraph();
         super.onPause();
     }
 
