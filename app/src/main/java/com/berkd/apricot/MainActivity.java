@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         ventilationStatus = findViewById(R.id.textVentilationStatus);
         connectionStatus = findViewById(R.id.textConnectionStatus);
 
-        aboutPopup();
+        //aboutPopup();
         buttonConnection();         // handle the "connection status" events
         buttonViewLogs();           // handle the "view logs" events
         buttonProgramMode();        // handle the "program mode" events
