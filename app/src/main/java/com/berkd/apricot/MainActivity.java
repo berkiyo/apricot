@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     double co2Count = Math.random()*1000;
     double humidCount = 20;
+    double tempCount = 20;
     double simVal = 0;
 
     int simState = 0;
@@ -99,9 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
         updateCo2Val();
         updateHumidity();
-        //updateTemperature();
-        //updateVentilation();
-
+        updateTemperature();
 
 
         GraphView graph = (GraphView) findViewById(R.id.graph);
@@ -317,6 +316,33 @@ public class MainActivity extends AppCompatActivity {
                                 theHumidVals = String.format("%.2f", humidCount);
                                 humidCount = humidCount + 0.5;
                                 humidReading.setText(String.valueOf(theHumidVals) + " %");
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        thread.start();
+    }
+
+    public void updateTemperature() {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                while (!isInterrupted()){
+                    try {
+                        Thread.sleep(5000);
+
+                        runOnUiThread(new Runnable() {
+                            String theTempVals;
+                            @Override
+                            public void run() {
+                                theTempVals = String.format("%.2f", tempCount);
+                                tempCount = tempCount + 0.5;
+                                tempReading.setText(String.valueOf(theTempVals) + " °C");
                             }
                         });
                     } catch (InterruptedException e) {
